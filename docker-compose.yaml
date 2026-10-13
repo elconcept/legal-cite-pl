@@ -1,0 +1,32 @@
+# mcp-cite - weryfikacja brzmienia przepisu PL/UE (Streamable HTTP, /mcp, port 8080, bezstanowy). Stack Portainera "mcp-cite".
+# Bez portu na hoscie. Dostep wylacznie: https://mcp-cite.xlap.pl/mcp - tunel cloudflared, bez Access (publiczny,
+# bezstanowy - konektory claude.ai/ChatGPT). cf_mcp_cite: cloudflared + ten serwis, z wyjsciem do internetu.
+# Przebudowa po pushu na main: deploy-hook (.github/workflows/deploy.yml).
+services:
+  mcp-cite:
+    build:
+      context: /volume2/docker/mcp-cite
+      dockerfile: Dockerfile
+    image: mcp-cite:latest
+    container_name: mcp-cite
+    user: "1029:100"
+    environment:
+      - TZ=Europe/Warsaw
+      - PORT=8080
+      - HOME=/tmp
+      - LEGAL_CITE_CACHE=/cache
+    networks:
+      - cf_mcp_cite
+    # konwersje PDF tekstow jednolitych (30-90 s kazda) trwale miedzy restartami; katalog poza gitem (.git/info/exclude)
+    volumes:
+      - /volume2/docker/mcp-cite/cache:/cache
+    healthcheck:
+      test: ["CMD", "python", "-c", "import socket; socket.create_connection((\"127.0.0.1\", 8080), 3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+networks:
+  cf_mcp_cite:
+    external: true
