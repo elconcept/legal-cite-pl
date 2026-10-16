@@ -1,5 +1,5 @@
 # mcp-cite - weryfikacja brzmienia przepisu PL/UE (Streamable HTTP, /mcp, port 8080, bezstanowy). Stack Portainera "mcp-cite".
-# Bez portu na hoscie. Dostep wylacznie: https://mcp-cite.xlap.pl/mcp - tunel cloudflared, bez Access (publiczny,
+# Port na hoscie 8404 (LAN, bez autoryzacji: http://10.0.10.201:8404/mcp). Z internetu: https://mcp-cite.xlap.pl/mcp - tunel cloudflared, bez Access (publiczny,
 # bezstanowy - konektory claude.ai/ChatGPT). cf_mcp_cite: cloudflared + ten serwis, z wyjsciem do internetu.
 # Przebudowa po pushu na main: deploy-hook (.github/workflows/deploy.yml).
 services:
@@ -15,6 +15,8 @@ services:
       - PORT=8080
       - HOME=/tmp
       - LEGAL_CITE_CACHE=/cache
+    ports:
+      - "8404:8080"
     networks:
       - cf_mcp_cite
     # konwersje PDF tekstow jednolitych (30-90 s kazda) trwale miedzy restartami; katalog poza gitem (.git/info/exclude)
